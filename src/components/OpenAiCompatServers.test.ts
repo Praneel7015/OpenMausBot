@@ -102,6 +102,14 @@ describe("adding another OpenAI-compatible server", () => {
     expect(body).toEqual({ displayName: "Ada's lab box", url: "https://ada.example.com/v1", key: KEY, models: ["Acme/My Model:v2", "Case-Sensitive/Model"] });
   });
 
+  it("submits the OpenAI catalog only for the OpenAI preset", async () => {
+    fixture.values = ["OpenAI", "https://api.openai.com/v1", KEY, ""];
+    fixture.api.mockReset().mockResolvedValueOnce({ instances: [] });
+    form().find((node) => node.type === "button" && JSON.stringify(node.props.children).includes("Add server"))!.props.onClick!();
+    await flush();
+    expect(JSON.parse(fixture.api.mock.calls[0]![1].body)).toEqual({ displayName: "OpenAI", url: "https://api.openai.com/v1", key: KEY, catalog: "openai" });
+  });
+
   it("prefills OpenRouter and clears another router's pending key and models", () => {
     fixture.values = ["My router", "https://router.example/v1", KEY, "private-model"];
     form().find((node) => node.type === "select")!.props.onChange!({ target: { value: "openrouter" } });

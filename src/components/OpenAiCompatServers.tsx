@@ -47,7 +47,7 @@ function AddedServers({ servers }: { servers: Array<InstanceInfo & { url?: strin
     "add",
     () => api("/api/instances/openai-compat", {
       method: "POST",
-      body: JSON.stringify({ displayName: name.trim(), url: url.trim(), key: key.trim(), ...(modelIds(models).length ? { models: modelIds(models) } : {}) }),
+      body: JSON.stringify({ displayName: name.trim(), url: url.trim(), key: key.trim(), ...(url.trim() === "https://api.openai.com/v1" ? { catalog: "openai" } : {}), ...(modelIds(models).length ? { models: modelIds(models) } : {}) }),
     }).then(
       (added) => { keySaved("custom_endpoint", "settings", "unverified"); return added; },
       (cause: unknown) => { keySaved("custom_endpoint", "settings", "error"); throw cause; },
