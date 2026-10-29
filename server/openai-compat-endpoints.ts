@@ -47,7 +47,7 @@ export function addEndpoint(instances: InstanceConfigMap, body: AddEndpoint): { 
   const models = [...new Set(body.models ?? [])];
   instances[instanceId] = {
     driver: "openai-compat", displayName: body.displayName, access: "api",
-    config: { key: body.key, url, ...(models.length ? { managedModels: models } : {}), ...(body.catalog ? { catalog: body.catalog } : {}) },
+    config: { key: body.key, url, provider: "", ...(models.length ? { managedModels: models } : {}), ...(body.catalog ? { catalog: body.catalog } : {}) },
   };
   return { instanceId };
 }

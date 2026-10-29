@@ -79,7 +79,7 @@ describe("added OpenAI-compatible servers", () => {
     expect(id).toMatch(/^openai-compat-/);
     expect(cfg.instances?.[id]).toEqual({
       driver: "openai-compat", displayName: "Zhipu", access: "api",
-      config: { key: SECRET, url: "https://open.bigmodel.cn/api/paas/v4", managedModels: ["glm-4.6", "glm-5"] },
+      config: { key: SECRET, url: "https://open.bigmodel.cn/api/paas/v4", provider: "", managedModels: ["glm-4.6", "glm-5"] },
     });
     expect(persisted).toHaveLength(1);
     expect(created.text).not.toContain(SECRET);

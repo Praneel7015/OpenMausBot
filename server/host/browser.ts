@@ -117,8 +117,10 @@ export function createBrowserHost(deps: BrowserHostDeps) {
   } });
   const host: HostKind = DESKTOP_MANAGED ? "desktop" : CLOUD_HOME || existsSync("/.dockerenv") ? "container" : "server";
   const idleMs = () => browserIdleMs(cfg, { cloudHome: Boolean(CLOUD_HOME) });
+  const activeBrowser = cfg.browserEngine?.browser ?? "auto";
   const chromeEngine = new ChromeEngine({
-    dataDir: DATA_DIR,
+    dataDir: activeBrowser === "brave" ? join(DATA_DIR, "brave") : DATA_DIR,
+    browser: activeBrowser,
     host,
     egressPort: (key) => browserEgress.open(key),
     egressNotice: (key) => browserEgress.takeNotice(key),
@@ -527,9 +529,10 @@ export function createBrowserHost(deps: BrowserHostDeps) {
     return { binaryPath: engine.binaryPath, session, env: browserSessionSpec(engine.binaryPath, session, profile, await browserEgress.open(session)).env, encryptionKey: browserEngineEncryptionKey() };
   }
   /** What Settings shows of the engine that runs bots' browsers here; My Chrome stays on agent-browser. */
-  function engineSummary<T extends { myChrome: boolean }>(agentBrowser: T): (T | (ReturnType<ChromeEngine["summary"]> & { myChrome: boolean })) & { engine: BrowserEngineKind } {
-    if (browserEngineKind(cfg) !== "chrome") return { ...agentBrowser, engine: "agent-browser" };
-    return { ...chromeEngine.summary(), myChrome: agentBrowser.myChrome, ...lentChromeSummary(), engine: "chrome" };
+  function engineSummary<T extends { myChrome: boolean }>(agentBrowser: T): (T | (ReturnType<ChromeEngine["summary"]> & { myChrome: boolean })) & { engine: BrowserEngineKind; browser: "auto" | "brave"; restartRequired: boolean } {
+    const selection = { browser: cfg.browserEngine?.browser ?? "auto", restartRequired: (cfg.browserEngine?.browser ?? "auto") !== activeBrowser };
+    if (browserEngineKind(cfg) !== "chrome") return { ...agentBrowser, engine: "agent-browser", ...selection };
+    return { ...chromeEngine.summary(), myChrome: agentBrowser.myChrome, ...lentChromeSummary(), engine: "chrome", ...selection };
   }
 
   return {

@@ -129,11 +129,19 @@ describe("the bots' browser host with browserEngine.engine set to chrome", () =>
     expect(host.signedInSitesRefusal("work")).toContain("does not list signed-in sites yet");
   });
 
+  it("reports a pending restart when the saved browser changes", () => {
+    const { cfg, host } = setup("chrome");
+    cfg.browserEngine = { engine: "chrome", browser: "brave" };
+    expect(host.engineSummary({ kind: "engine", myChrome: true })).toMatchObject({ browser: "brave", restartRequired: true });
+    cfg.browserEngine.browser = "auto";
+    expect(host.engineSummary({ kind: "engine", myChrome: true })).toMatchObject({ browser: "auto", restartRequired: false });
+  });
+
   it("says in the status which engine runs the bots' browsers", () => {
     const { cfg, host } = setup("chrome");
     expect(host.engineSummary({ kind: "unavailable", reason: "agent-browser is not installed", myChrome: true })).toMatchObject({ engine: "chrome", myChrome: true });
     cfg.browserEngine = { engine: "agent-browser" };
-    expect(host.engineSummary({ kind: "unavailable", reason: "agent-browser is not installed", myChrome: true })).toEqual({ kind: "unavailable", reason: "agent-browser is not installed", myChrome: true, engine: "agent-browser" });
+    expect(host.engineSummary({ kind: "unavailable", reason: "agent-browser is not installed", myChrome: true })).toEqual({ kind: "unavailable", reason: "agent-browser is not installed", myChrome: true, engine: "agent-browser", browser: "auto", restartRequired: false });
   });
 
   it("forgets the new engine's sessions when the engine is switched back", async () => {
@@ -451,7 +459,7 @@ describe("the bots' browser host by default", () => {
     const { host } = setup(undefined);
     expect(host.browserSystemPrompt(undefined)).toBe(BUILT_IN_BROWSER_SYSTEM_PROMPT);
     expect(host.signedInSitesRefusal("work")).toBeNull();
-    expect(host.engineSummary({ kind: "engine", version: "0.37.0", myChrome: true })).toEqual({ kind: "engine", version: "0.37.0", myChrome: true, engine: "agent-browser" });
+    expect(host.engineSummary({ kind: "engine", version: "0.37.0", myChrome: true })).toEqual({ kind: "engine", version: "0.37.0", myChrome: true, engine: "agent-browser", browser: "auto", restartRequired: false });
   });
 });
 
